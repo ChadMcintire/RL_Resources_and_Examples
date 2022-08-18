@@ -23,5 +23,4 @@ Good RL starting points
 
 https://spinningup.openai.com/en/latest/user/introduction.html
 http://incompleteideas.net/book/the-book-2nd.html
-
-
+https://julien-vitay.net/deeprl/Introduction.html#sec:introduction
