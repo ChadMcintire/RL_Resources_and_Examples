@@ -1,7 +1,7 @@
 import torch
 from model import QNetwork
 from torch.optim import Adam
-from model import GaussianPolicy
+from model import GaussianPolicy, DeterministicPolicy
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, args):
