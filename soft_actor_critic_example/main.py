@@ -3,6 +3,9 @@ import gym
 import torch
 from sac import SAC
 import numpy as np
+from torch.utils.tensorboard import SummaryWriter
+import datetime
+from replay_memory import ReplayMemory
 
 def training_loop(args):
     #set up environment
@@ -15,6 +18,14 @@ def training_loop(args):
     np.random.seed(args.seed)
 
     agent = SAC(env.observation_space.shape[0], env.action_space, args)
+    
+    writer = SummaryWriter("run/{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name, 
+                           args.policy, "autotune" if args.automatic_entropy_tuning else ""))
+
+    
+    #Memory
+    memory = ReplayMemory(args.replay_size, args.seed)
+    
     
     print("yes")
 
@@ -45,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("--cuda", action="store_true", help="run on CUDA (default: False)")
     parser.add_argument('--hidden_size', type=int, default=256, metavar='N', help='hidden size (default: 256)')
     parser.add_argument("--lr", type=float, default=0.0003, metavar="G", help="learning_rate (default: 0.0003)")
+    parser.add_argument("--replay_size", type=int, default=1000000, metavar="N", help="size of replay buffer (default: 1000000)")
     args = parser.parse_args()
 
     training_loop(args)
