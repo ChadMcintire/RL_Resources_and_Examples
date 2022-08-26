@@ -1,0 +1,22 @@
+sudo apt-get install libglew-dev
+sudo apt-get install libosmesa6-dev
+sudo apt-get install patchelf
+
+pip3 install torch torchvision torchaudio
+pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
+pip3 install pip install gym==0.13.1
+pip3 install gym
+pip3 install tensorboard
+
+#install for beeping alert to let you know when validation starts
+#for more info see here:
+#https://github.com/greghesp/assistant-relay/issues/49
+sudo apt-get install libasound2-dev
+pip install beepy
+
+#this version didn't work with the version of gym necessary
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/chad/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+
+This is the correct version of mujoco needed for the gym version
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/chad/.mujoco/mjpro150/bin
