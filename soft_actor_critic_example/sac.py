@@ -26,6 +26,7 @@ class SAC(object):
         #optimizer setup for the critic
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
+        #this is interesting, initializing a new target, generally I see a deep copy of the critic
         self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
 
         #???why does the Gaussian policy employ automatic tuning and the deterministic not

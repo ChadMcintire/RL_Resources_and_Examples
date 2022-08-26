@@ -83,7 +83,7 @@ def training_loop(args):
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
         if i_episodes % 500 == 0 and args.eval is True:
-            validation_episodes(env, i_episodes, agent, writer)
+            validation_episodes(env, i_episodes, agent, writer, args.render)
     
     env.close()
 
@@ -122,6 +122,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_steps', type=int, default=1000001, metavar='N', help='maximum number of steps (default: 1000000)')
     parser.add_argument('--eval', type=bool, default=True, help='Evaluates a policy a policy every 10 episode (default: True)')
     parser.add_argument('--updates_per_step', type=int, default=1, metavar='N', help='model updates per simulator step (default: 1)')
+    parser.add_argument('--render', type=bool, default=False, help='Allows you to render the environment or not')
 
     args = parser.parse_args()
 

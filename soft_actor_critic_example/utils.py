@@ -16,7 +16,8 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-def validation_episodes(env, i_episodes, agent, writer):
+def validation_episodes(env, i_episodes, agent, writer, render):
+    print("beginning validation")
     avg_reward = 0.
     episodes = 10
 
@@ -25,7 +26,6 @@ def validation_episodes(env, i_episodes, agent, writer):
         env.render()
         episode_reward = 0
         done = False
-        render = True
         while not done:
             if render == True:
                 env.render()
