@@ -1,6 +1,14 @@
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
+import torch.nn.functional as F
+
+
+#Where do these magic numbers come from
+LOG_SIG_MAX = 2
+LOG_SIG_MIN = -20
+epsilon = 1e-6
+
 
 # Initialize Policy weights
 def weights_init_(m):
@@ -14,7 +22,7 @@ class QNetwork(nn.Module):
 
         # Q1 architecture
         self.linear1 = nn.Linear(num_inputs + num_actions, hidden_dim)
-        self.linear2 = nn.Linear(num_inputs + num_actions, hidden_dim)
+        self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, 1)
 
         # Q2 architecture
@@ -28,7 +36,7 @@ class QNetwork(nn.Module):
         xu = torch.cat([state, action], 1)
 
         x1 = F.relu(self.linear1(xu))
-        x1 = F.relu(self.linear2(x2))
+        x1 = F.relu(self.linear2(x1))
         x1 = self.linear3(x1)
 
 
@@ -78,13 +86,14 @@ class GaussianPolicy(nn.Module):
         #using rsample() instead of sample() because it is it allows for back propagation
         #as sample() doesn't come with the computational graph
         #parameter
+        # see https://stackoverflow.com/questions/60533150/what-is-the-difference-between-sample-and-rsample
         x_t = normal.rsample() #for reparameterization trick (mean + std * N(0, 1)) 
         y_t = torch.tanh(x_t)
         action = y_t * self.action_scale + self.action_bias
         log_prob = normal.log_prob(x_t)
         # Enforcing Action Bound
         log_prob -= torch.log(self.action_scale * (1 - y_t.pow(2)) + epsilon)
-        log_prob = log_prob.sum(1, keep_dim=True)
+        log_prob = log_prob.sum(1, keepdim=True)
         mean = torch.tanh(mean) * self.action_scale + self.action_bias
         return action, log_prob, mean
 
