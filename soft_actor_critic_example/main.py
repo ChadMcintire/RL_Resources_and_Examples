@@ -7,8 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 import datetime
 from replay_memory import ReplayMemory
 import itertools
-
-
+from utils import validation_episodes
 
 def training_loop(args):
     #set up environment
@@ -68,11 +67,14 @@ def training_loop(args):
             # (https://github.com/openai/spinningup/blob/master/spinup/algos/sac/sac.py)
             mask = 1 if episode_steps == env._max_episode_steps else float(not done)
 
+            #update current trajectories by adding them to memory
             memory.push(state, action, reward, next_state, mask) # Append transition to memory
 
+            #update the next state to the current state so we can move to the next step
             state = next_state
 
 
+        #end if max steps reached
         if total_numsteps > args.num_steps:
             break
 
@@ -80,34 +82,12 @@ def training_loop(args):
         #print every iteration
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
-        if i_episodes % 100 == 0 and args.eval is True:
-            avg_reward = 0.
-            episodes = 10
-
-            for _ in range(episodes):
-                state = env.reset()
-                episode_reward = 0
-                done = False
-                while not done:
-                    action = agent.select_action(state, evaluation=True)
-
-                    next_state, reward, done, _ = env.step(action)
-                    episode_reward += reward
-
-                    state = next_state
-                avg_reward += episode_reward
-            avg_reward /= episodes
-
-            writer.add_scalar("avg_reward/test", avg_reward, i_episodes)
-
-            print("-------------------------------------------")
-            print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
-            print("----------------------------------------")
-    
+        if i_episodes % 500 == 0 and args.eval is True:
+            validation_episodes(env, i_episodes, agent, writer)
     
     env.close()
 
-    print("yes")
+    print("successfully exited")
 
 
 

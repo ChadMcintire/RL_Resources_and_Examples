@@ -1,4 +1,5 @@
 import torch
+import time
 
 # Update the target network weights as is typical for actor critic models
 # parameters is the weights of each
@@ -15,17 +16,21 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-def validation_episodes(
+def validation_episodes(env, i_episodes, agent, writer):
     avg_reward = 0.
     episodes = 10
 
     for _ in range(episodes):
         state = env.reset()
+        env.render()
         episode_reward = 0
         done = False
+        render = True
         while not done:
+            if render == True:
+                env.render()
+                time.sleep(.1)
             action = agent.select_action(state, evaluation=True)
-
             next_state, reward, done, _ = env.step(action)
             episode_reward += reward
 
@@ -35,7 +40,7 @@ def validation_episodes(
 
     writer.add_scalar("avg_reward/test", avg_reward, i_episodes)
 
-        print("-------------------------------------------")
-        print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
-        print("----------------------------------------")
+    print("-------------------------------------------")
+    print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
+    print("----------------------------------------")
 
