@@ -2,6 +2,8 @@ import torch
 from model import QNetwork
 from torch.optim import Adam
 from model import GaussianPolicy, DeterministicPolicy
+import torch.nn.functional as F
+from utils import soft_update, hard_update
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, args):
@@ -35,7 +37,7 @@ class SAC(object):
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
             
             self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
-            self.policy = Adam(self.policy.parameters(), lr=args.lr)
+            self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         else:
             self.alpha = 0
@@ -53,9 +55,9 @@ class SAC(object):
         return action.detach().cpu().numpy()[0]
 
 
-    def update_parameter(self, memory, batch_size, updates):
+    def update_parameters(self, memory, batch_size, updates):
         # Sample a batch from memory
-        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(batch_size, batch_size)
+        state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(batch_size=batch_size)
 
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
