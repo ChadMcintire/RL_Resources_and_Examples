@@ -4,6 +4,7 @@ from torch.optim import Adam
 from model import GaussianPolicy, DeterministicPolicy
 import torch.nn.functional as F
 from utils import soft_update, hard_update
+from torchinfo import summary
 
 class SAC(object):
     def __init__(self, num_inputs, action_space, args):
@@ -20,14 +21,24 @@ class SAC(object):
         #Send to GPU if available
         self.device = torch.device("cuda" if args.cuda else "cpu")
 
-        #add the 
+        
         self.critic = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
+    
+        #print a summary of the tensor model
+        #this summary is based on the forward, so the left is the shape of the state and the right, the action space
+        #for example see https://github.com/sksq96/pytorch-summary#multiple-inputs
+        print("\n\n\n\nSummary of the Sac critic")
+        summary(self.critic, [(args.hidden_size, num_inputs)  ,(args.hidden_size, action_space.shape[0])])
 
         #optimizer setup for the critic
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
         #this is interesting, initializing a new target, generally I see a deep copy of the critic
         self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
+
+        #print a summary of the tensor model
+        print("\n\n\n\nSummary of the Sac target")
+        summary(self.critic_target, [(args.hidden_size, num_inputs)  ,(args.hidden_size, action_space.shape[0])])
 
         #???why does the Gaussian policy employ automatic tuning and the deterministic not
         if self.policy_type == "Gaussian":
@@ -38,12 +49,22 @@ class SAC(object):
                 self.alpha_optim = Adam([self.log_alpha], lr=args.lr)
             
             self.policy = GaussianPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
+
+            #print a summary of the tensor model
+            print("\n\n\n\nSummary of the Gaussian Policy")
+            summary(self.policy, [(args.hidden_size, num_inputs)])
+
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
         else:
             self.alpha = 0
             self.automatic_entropy_tuning = False
             self.policy = DeterministicPolicy(num_inputs, action_space.shape[0], args.hidden_size, action_space).to(self.device)
+
+            #print a summary of the tensor model
+            print("\n\n\n\nSummary of the Deterministic Policy")
+            summary(self.policy, [(args.hidden_size, num_inputs)])
+
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
     #change the state to a float tensor and send it to gpu for linear performance increase
