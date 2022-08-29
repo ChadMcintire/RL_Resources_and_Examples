@@ -124,7 +124,7 @@ class DeterministicPolicy(nn.Module):
     def forward(self, state):
         x = F.relu(self.linear1(state))
         x = F.relu(self.linear2(x))
-        mean = torch.tahn(self.mean(x)) * self.action_scale + self.action_bias
+        mean = torch.tanh(self.mean(x)) * self.action_scale + self.action_bias
         return mean
 
     def sample(self, state):
