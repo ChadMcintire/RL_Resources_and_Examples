@@ -3,14 +3,20 @@ import time
 import glfw
 import beepy
 
-# Update the target network weights as is typical for actor critic models
-# parameters is the weights of each
+"""
+*******************************************************************
+* Update the target network weights as is typical for actor critic models
+* parameters is the weights of each
+*
+* In this implementation this is only used to copy the initial of the critic 
+* to the weights of the critic target
+*
+* for reference: https://discuss.pytorch.org/t/copy-weights-only-from-a-networks-parameters/5841
+*******************************************************************
+"""
 def hard_update(target, source):
     for target_param, param in zip(target.parameters(), source.parameters()):
-        target_param.copy_(param.data)
-        #this was the original code, the use of .data.copy_ can create problems
-        #as per https://discuss.pytorch.org/t/using-tensor-data/79640
-        #target_param.data.copy_(param.data)
+        target_param.data.copy_(param.data)
 
 
 def soft_update(target, source, tau):
@@ -18,6 +24,13 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
+"""
+*******************************************************************
+* Show 10 episodes under the current policy, this will render
+* the environment for those episodes if the render variable is not
+* false. This will also print the average reward.
+*******************************************************************
+"""
 def validation_episodes(env, i_episodes, agent, writer, render):
     print("beginning validation")
     beepy.beep(sound=6)

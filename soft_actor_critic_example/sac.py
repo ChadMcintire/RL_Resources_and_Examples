@@ -21,7 +21,7 @@ class SAC(object):
         #Send to GPU if available
         self.device = torch.device("cuda" if args.cuda else "cpu")
 
-        
+        #set up the critic, which will be a Q function approximator 
         self.critic = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
     
         #print a summary of the tensor model
@@ -33,12 +33,17 @@ class SAC(object):
         #optimizer setup for the critic
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
 
-        #this is interesting, initializing a new target, generally I see a deep copy of the critic
+        
+        #set up the critic_target, which will be a Q function approximator 
         self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
 
         #print a summary of the tensor model
         print("\n\n\n\nSummary of the Sac target")
         summary(self.critic_target, [(args.batch_size, num_inputs)  ,(args.batch_size, action_space.shape[0])])
+
+        #this is interesting, initializing a new target, generally I see a deep copy of the critic
+        #not necessary to have here because it worked without it but might speed up convergence
+        hard_update(self.critic_target, self.critic)
 
         #???why does the Gaussian policy employ automatic tuning and the deterministic not
         if self.policy_type == "Gaussian":
@@ -67,7 +72,14 @@ class SAC(object):
 
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
-    #change the state to a float tensor and send it to gpu for linear performance increase
+    """
+    *******************************************************************
+    *
+    *The action selected is the current policy action or the mean after
+    *the policy is trained
+    *
+    *******************************************************************
+    """
     def select_action(self, state, evaluation=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
         if evaluation is False:
@@ -77,6 +89,14 @@ class SAC(object):
         return action.detach().cpu().numpy()[0]
 
 
+    """
+    *******************************************************************
+    *
+    *
+    *
+    *
+    *******************************************************************
+    """
     def update_parameters(self, memory, batch_size, updates):
         # Sample a batch from memory
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(batch_size=batch_size)
@@ -91,12 +111,10 @@ class SAC(object):
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
-            print("target_shape", next_state_batch.shape, next_state_action.shape)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
 
         qf1, qf2 = self.critic(state_batch, action_batch) #Two Q-functions to mitigate positive bias in the policy improvement step
-        print("critic_shape", state_batch.shape, action_batch.shape)
         qf1_loss = F.mse_loss(qf1, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
         qf_loss = qf1_loss + qf2_loss
@@ -134,6 +152,14 @@ class SAC(object):
 
         return qf1_loss.item(), qf2_loss.item(), policy_loss.item(), alpha_loss.item(), alpha_tlogs.item()
 
+    """
+    *******************************************************************
+    *
+    *Save the Policy, Critic, Critic target, and the Critic and Policies
+    * optimizers
+    *
+    *******************************************************************
+    """
     # Save model parameters
     def save_checkpoint(self, env_name, suffix="", ckpt_path=None):
         if not os.path.exists("checkpoints/"):
@@ -147,6 +173,15 @@ class SAC(object):
                     "critic_optimizer_state_dict": self.critic_optim.state_dict(),
                     "policy_optimizer_state_dict": self.policy_optim.state_dict()}, ckpt_path)
 
+
+    """
+    *******************************************************************
+    *
+    *Load the Policy, Critic, Critic target, and the Critic and Policies
+    * optimizers
+    *
+    *******************************************************************
+    """
     #Load model parameters
     def load_checkpoint(self, ckpt_path, evaluate=False):
         print("Loading models from {}".format(ckpt_path))
