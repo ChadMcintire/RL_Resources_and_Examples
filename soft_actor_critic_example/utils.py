@@ -1,5 +1,7 @@
 import torch
 import time
+import glfw
+import beepy
 
 # Update the target network weights as is typical for actor critic models
 # parameters is the weights of each
@@ -18,12 +20,13 @@ def soft_update(target, source, tau):
 
 def validation_episodes(env, i_episodes, agent, writer, render):
     print("beginning validation")
+    beepy.beep(sound=6)
+
     avg_reward = 0.
     episodes = 10
 
     for _ in range(episodes):
         state = env.reset()
-        env.render()
         episode_reward = 0
         done = False
         while not done:
@@ -40,6 +43,12 @@ def validation_episodes(env, i_episodes, agent, writer, render):
 
     writer.add_scalar("avg_reward/test", avg_reward, i_episodes)
 
+    #terminate window when not necessary
+    #print("terminating window after validation")
+    #neither close nor terminate work properly to close the glfw window and resume
+    #after
+    #env.close()
+    #glfw.terminate()
     print("-------------------------------------------")
     print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
     print("----------------------------------------")
