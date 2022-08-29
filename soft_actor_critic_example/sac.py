@@ -28,7 +28,7 @@ class SAC(object):
         #this summary is based on the forward, so the left is the shape of the state and the right, the action space
         #for example see https://github.com/sksq96/pytorch-summary#multiple-inputs
         print("\n\n\n\nSummary of the Sac critic")
-        summary(self.critic, [(args.hidden_size, num_inputs)  ,(args.hidden_size, action_space.shape[0])])
+        summary(self.critic, [(args.batch_size, num_inputs)  ,(args.batch_size, action_space.shape[0])])
 
         #optimizer setup for the critic
         self.critic_optim = Adam(self.critic.parameters(), lr=args.lr)
@@ -38,7 +38,7 @@ class SAC(object):
 
         #print a summary of the tensor model
         print("\n\n\n\nSummary of the Sac target")
-        summary(self.critic_target, [(args.hidden_size, num_inputs)  ,(args.hidden_size, action_space.shape[0])])
+        summary(self.critic_target, [(args.batch_size, num_inputs)  ,(args.batch_size, action_space.shape[0])])
 
         #???why does the Gaussian policy employ automatic tuning and the deterministic not
         if self.policy_type == "Gaussian":
@@ -52,7 +52,7 @@ class SAC(object):
 
             #print a summary of the tensor model
             print("\n\n\n\nSummary of the Gaussian Policy")
-            summary(self.policy, [(args.hidden_size, num_inputs)])
+            summary(self.policy, [(args.batch_size, num_inputs)])
 
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
@@ -63,7 +63,7 @@ class SAC(object):
 
             #print a summary of the tensor model
             print("\n\n\n\nSummary of the Deterministic Policy")
-            summary(self.policy, [(args.hidden_size, num_inputs)])
+            summary(self.policy, [(args.batch_size, num_inputs)])
 
             self.policy_optim = Adam(self.policy.parameters(), lr=args.lr)
 
@@ -81,6 +81,7 @@ class SAC(object):
         # Sample a batch from memory
         state_batch, action_batch, reward_batch, next_state_batch, mask_batch = memory.sample(batch_size=batch_size)
 
+        #Send devices to GPU if available
         state_batch = torch.FloatTensor(state_batch).to(self.device)
         next_state_batch = torch.FloatTensor(next_state_batch).to(self.device)
         action_batch = torch.FloatTensor(action_batch).to(self.device)
@@ -90,10 +91,12 @@ class SAC(object):
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
+            print("target_shape", next_state_batch.shape, next_state_action.shape)
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
 
         qf1, qf2 = self.critic(state_batch, action_batch) #Two Q-functions to mitigate positive bias in the policy improvement step
+        print("critic_shape", state_batch.shape, action_batch.shape)
         qf1_loss = F.mse_loss(qf1, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
         qf_loss = qf1_loss + qf2_loss
