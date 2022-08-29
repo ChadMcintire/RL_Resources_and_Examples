@@ -7,6 +7,7 @@ pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
 pip3 install pip install gym==0.13.1
 pip3 install gym
 pip3 install tensorboard
+pip install torchinfo
 
 #install for beeping alert to let you know when validation starts
 #for more info see here:
