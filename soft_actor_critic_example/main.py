@@ -16,17 +16,20 @@ def training_loop(args):
     #set up seeding
     env.seed(args.seed)
     env.action_space.seed(args.seed)
-
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
+    #initialize the sac agent
     agent = SAC(env.observation_space.shape[0], env.action_space, args)
     
+    #this is a logger, which is a great idea but might need to be removed
+    #so it doesnt' obscure the code for readers
     writer = SummaryWriter("run/{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name, 
                            args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
-    
-    #Memory
+
+    #Memory replay, this helps with non-stationarity and the to help
+    #the model not be sequential data for the for the Markov assumption
     memory = ReplayMemory(args.replay_size, args.seed)
 
     #Training Loop
@@ -57,6 +60,7 @@ def training_loop(args):
                     writer.add_scalar("entropy_temperature/alpha", alpha, updates)
                     updates += 1
 
+            #set the state to the next state and update the variables that depend on the step number
             next_state, reward, done, _ = env.step(action) # Step
             episode_steps += 1
             total_numsteps += 1
@@ -82,22 +86,13 @@ def training_loop(args):
         #print every iteration
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
-        if i_episodes % 500 == 0 and args.eval is True:
+        #Validate the learning every several hundred episodes
+        if i_episodes % steps_between_validation == 0 and args.eval is True:
             validation_episodes(env, i_episodes, agent, writer, args.render)
     
     env.close()
 
     print("successfully exited")
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -123,6 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('--eval', type=bool, default=True, help='Evaluates a policy a policy every 10 episode (default: True)')
     parser.add_argument('--updates_per_step', type=int, default=1, metavar='N', help='model updates per simulator step (default: 1)')
     parser.add_argument('--render', type=bool, default=False, help='Allows you to render the environment or not')
+    parser.add_argument('--steps_between_validation', type=int, default=500, metavar='N', help='This gives the variable that allows the user to validate how the algorithm is performing')
 
     args = parser.parse_args()
 
