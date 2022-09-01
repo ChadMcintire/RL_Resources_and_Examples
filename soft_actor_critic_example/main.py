@@ -87,7 +87,7 @@ def training_loop(args):
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
         #Validate the learning every several hundred episodes
-        if i_episodes % steps_between_validation == 0 and args.eval is True:
+        if i_episodes % int(args.steps_between_validation) == 0 and args.eval is True:
             validation_episodes(env, i_episodes, agent, writer, args.render)
     
     env.close()
