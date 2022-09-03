@@ -16,6 +16,21 @@ def weights_init_(m):
         torch.nn.init.xavier_uniform_(m.weight, gain=1)
         torch.nn.init.constant_(m.bias, 0)
 
+
+"""
+*******************************************************************
+* The Q-function network approximates 2 Q-functions, Q1 and Q2.
+* This is done for two reason, as laid out on page 8 of Soft Actor-Critic
+* with Application:
+*
+* 1. To "mitigate positive bias in the policy improvement step, that is known
+* to degrade performance of value based methods
+*
+* 2. "We found two soft Q-functions significantly speed up training, especially
+* on harder tasks.
+*******************************************************************
+"""
+
 class QNetwork(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim):
         super(QNetwork, self).__init__()

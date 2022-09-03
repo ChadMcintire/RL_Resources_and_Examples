@@ -108,33 +108,66 @@ class SAC(object):
         reward_batch = torch.FloatTensor(reward_batch).to(self.device).unsqueeze(1)
         mask_batch = torch.FloatTensor(mask_batch).to(self.device).unsqueeze(1)
 
+        #As we are producing values to be used for our forward pass, a no grad is appropriate
         with torch.no_grad():
             next_state_action, next_state_log_pi, _ = self.policy.sample(next_state_batch)
             qf1_next_target, qf2_next_target = self.critic_target(next_state_batch, next_state_action)
+
+            #compute equation 3 from Soft Actor critic with Applications
+            #??? unsure why we use the min of the 2 networks, need to read up why we would have a positive bias
+            #Soft Actor critic with Application page 8, section 6 states we use the min of the 2 networks to 
+            #speed up training and mitigate positive bias in policy improvement step
             min_qf_next_target = torch.min(qf1_next_target, qf2_next_target) - self.alpha * next_state_log_pi
+  
+            #don't update value if we hit a terminal state
             next_q_value = reward_batch + mask_batch * self.gamma * (min_qf_next_target)
 
+        #forward pass on the critic network 
         qf1, qf2 = self.critic(state_batch, action_batch) #Two Q-functions to mitigate positive bias in the policy improvement step
+
+
+        #this is on Soft Actor critic with Application page 6, equation 7
         qf1_loss = F.mse_loss(qf1, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
         qf2_loss = F.mse_loss(qf2, next_q_value) # JQ = Expectation(st, at) ~ D[0.5(Q1(st,at) - r(st,at) - gamma(expectation_st+1~p[V(st+1)]))^2]
+
+        #compute both losses at the same time for efficiency
+        #https://discuss.pytorch.org/t/how-are-optimizer-step-and-loss-backward-related/7350/3
         qf_loss = qf1_loss + qf2_loss
 
+        #reset gradient for new batch for the critic
         self.critic_optim.zero_grad()
+
+        #compute the gradients of the loss with respect to the modeters
         qf_loss.backward()
+
+        #this is where the critic is actually updated
         self.critic_optim.step()
 
+        
         pi, log_pi, _ = self.policy.sample(state_batch)
-
         qf1_pi, qf2_pi = self.critic(state_batch, pi)
+
+        #Soft Actor critic with Application page 8, section 6 states we use the min of the 2 networks to 
+        #speed up training and mitigate positive bias in policy improvement step
         min_qf_pi = torch.min(qf1_pi, qf2_pi)
 
+        #this is on Soft Actor critic with Application page 6, equation 9
+        #The .mean() is used for the expectation in the formula
         policy_loss = ((self.alpha * log_pi) - min_qf_pi).mean()  # Jπ = 𝔼st∼D,εt∼N[α * logπ(f(εt;st)|st) − Q(st,f(εt;st))]
 
+        #reset the policy gradient
         self.policy_optim.zero_grad()
+
+        #compute policy gradient
         policy_loss.backward()
+
+        #update policy parameters
         self.policy_optim.step()
 
         if self.automatic_entropy_tuning:
+            #this is on Soft Actor critic with Application page 7, equation 17
+            #same equation, just distribute the log_alpha and -1
+            #the .mean() call comes from the #expectation in the formula
             alpha_loss = -(self.log_alpha * (log_pi + self.target_entropy).detach()).mean()
 
             self.alpha_optim.zero_grad()
