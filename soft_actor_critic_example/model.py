@@ -112,6 +112,9 @@ class GaussianPolicy(nn.Module):
         mean = torch.tanh(mean) * self.action_scale + self.action_bias
         return action, log_prob, mean
 
+    #might be cool to remove the action scaling to see how much it improves it
+    #the action scaling was done on this commit:
+    #https://github.com/pranz24/pytorch-soft-actor-critic/pull/15/commits/ab2c461af06ae94f271d827eb926d3776d539300
     def to(self, device):
         self.action_scale = self.action_scale.to(device)
         self.action_bias = self.action_bias.to(device)

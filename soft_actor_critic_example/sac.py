@@ -177,9 +177,13 @@ class SAC(object):
             self.alpha = self.log_alpha.exp()
             alpha.tlogs = self.alpha.clone() #For TensorboardX logs
         else:
+            # if you using a deterministic algorithm, alpha will be 0
+            # and revert to the standard reinforment learning objective
+            # replace 0 for alpha on equation 1 of Soft Actor Critic with Application
             alpha_loss = torch.tensor(0.).to(self.device)
             alpha_tlogs = torch.tensor(self.alpha) #For TensorboardX logs 
 
+        
         if updates % self.target_update_interval == 0:
             soft_update(self.critic_target, self.critic, self.tau)
 
