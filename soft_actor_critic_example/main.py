@@ -107,7 +107,10 @@ if __name__ == "__main__":
     parser.add_argument("--alpha", type=float, default=0.2, metavar="G", help="Temperature parameter alpha determines the relative importance of the entropy term against the reward (default: 0.2)")
     parser.add_argument("--policy", default="Gaussian", help="Policy Type: Gaussian | Determinitst (default: Gaussian)")
     parser.add_argument("--target_update_interval", type=int, default=1, metavar="N", help="value target update per no. of updates per step (default 1)")
-    parser.add_argument("--automatic_entropy_tuning", type=bool, default=False, metavar="G", help="Automatically adjust alpha (default: False)")
+    parser.add_argument("--automatic_entropy_tuning", action="store_true", dest="automatic_entropy_tuning", help="Automatically adjust alpha (default: False)")
+    parser.add_argument("--no-automatic_entropy_tuning", action="store_false", dest="automatic_entropy_tuning", help="Automatically adjust alpha (default: False)")
+    parser.set_defaults(render=False)
+
     parser.add_argument("--cuda", action="store_true", help="run on CUDA (default: False)")
     parser.add_argument('--hidden_size', type=int, default=256, metavar='N', help='hidden size (default: 256)')
     parser.add_argument("--lr", type=float, default=0.0003, metavar="G", help="learning_rate (default: 0.0003)")
@@ -117,7 +120,9 @@ if __name__ == "__main__":
     parser.add_argument('--num_steps', type=int, default=1000001, metavar='N', help='maximum number of steps (default: 1000000)')
     parser.add_argument('--eval', type=bool, default=True, help='Evaluates a policy a policy every 10 episode (default: True)')
     parser.add_argument('--updates_per_step', type=int, default=1, metavar='N', help='model updates per simulator step (default: 1)')
-    parser.add_argument('--render', type=bool, default=False, help='Allows you to render the environment or not')
+    parser.add_argument('--render', dest="render", action='store_true', help='Allows you to render the environment or not (defaults: False)')
+    parser.add_argument('--no-render', dest="render", action='store_false', help='Allows you to render the environment or not (defaults: False)')
+    parser.set_defaults(render=False)
     parser.add_argument('--steps_between_validation', type=int, default=500, metavar='N', help='This gives the variable that allows the user to validate how the algorithm is performing')
 
     args = parser.parse_args()

@@ -4,10 +4,12 @@ sudo apt-get install patchelf
 
 pip3 install torch torchvision torchaudio
 pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
-pip3 install pip install gym==0.13.1
-pip3 install gym
+pip3 install gym==0.13.1
 pip3 install tensorboard
 pip install torchinfo
+
+#install glfw
+pip install glfw
 
 #install for beeping alert to let you know when validation starts
 #for more info see here:
@@ -21,3 +23,15 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 
 This is the correct version of mujoco needed for the gym version
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/chad/.mujoco/mjpro150/bin
+
+#install directions for mujoco
+mkdir installations
+cd installations/
+wget https://www.roboti.us/download/mjpro150_linux.zip
+unzip mjpro150_linux.zip
+mkdir ~/.mujoco
+mv mjpro150/ ~/.mujoco/
+wget https://www.roboti.us/file/mjkey.txt
+mv mjkey.txt ~/.mujoco/
+sudo apt-get install libosmesa6-dev
+pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
