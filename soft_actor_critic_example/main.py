@@ -12,6 +12,8 @@ from utils import validation_episodes
 def training_loop(args):
     #set up environment
     env = gym.make(args.env_name)
+    current_reward = 0
+    max_reward = 0
 
     #set up seeding
     env.seed(args.seed)
@@ -88,7 +90,11 @@ def training_loop(args):
 
         #Validate the learning every several hundred episodes
         if i_episodes % int(args.steps_between_validation) == 0 and args.eval is True:
-            validation_episodes(env, i_episodes, agent, writer, args.render)
+            current_reward = validation_episodes(env, i_episodes, agent, writer, args.render)
+
+            if max_reward <= current_reward:
+                agent.save_checkpoint(args.env_name, suffix=total_numsteps, ckpt_path=None)
+                max_reward = current_reward
     
     env.close()
 

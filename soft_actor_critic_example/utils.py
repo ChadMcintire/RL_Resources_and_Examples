@@ -66,3 +66,4 @@ def validation_episodes(env, i_episodes, agent, writer, render):
     print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
     print("----------------------------------------")
 
+    return avg_reward
