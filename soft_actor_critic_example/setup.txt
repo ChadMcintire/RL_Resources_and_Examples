@@ -35,3 +35,33 @@ wget https://www.roboti.us/file/mjkey.txt
 mv mjkey.txt ~/.mujoco/
 sudo apt-get install libosmesa6-dev
 pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
+
+#setup virtual env
+sudo apt-get install python3-venv
+python3 -m venv Sacenv
+. Sacenv/bin/activate
+pip3 install wheel
+
+#actual dependecies
+pip3 install gym==0.13.1
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+pip install glfw
+sudo apt-get install libasound2-dev
+pip install beepy
+
+
+#actual numbers
+torch                   1.12.1+cu116
+torchaudio              0.12.1+cu116
+torchinfo               1.7.0
+torchvision             0.13.1+cu116
+beepy                   1.0.7
+glfw                    2.5.5
+gym                     0.13.1
+
+
+#fix nvidia drivers
+sudo apt-key del 7fa2af80
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb
+sudo dpkg -i cuda-keyring_1.0-1_all.deb
+sudo apt install nvidia-driver-510 -y
