@@ -93,7 +93,7 @@ def training_loop(args):
         if total_numsteps > int(val_steps) and args.eval is True:
             val_steps = int(val_steps) + int(args.steps_between_validation)
             current_reward = validation_episodes(env, total_num_steps, agent, writer, args.render)
-            writer.add_scalar("reward/train", current_reward, total_numsteps)
+            writer.add_scalar("reward/train", current_reward, total_num_steps)
 
             if max_reward <= current_reward:
                 agent.save_checkpoint(args.env_name, suffix=total_numsteps, ckpt_path=args.check_pt_name)
