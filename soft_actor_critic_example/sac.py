@@ -83,8 +83,11 @@ class SAC(object):
     """
     def select_action(self, state, evaluation=False):
         state = torch.FloatTensor(state).to(self.device).unsqueeze(0)
+
+        #get the action from the policy while training
         if evaluation is False:
             action, _, _ = self.policy.sample(state)
+        #get the average for that state on the trained policy
         else:
             _, _, action = self.policy.sample(state)
         return action.detach().cpu().numpy()[0]
@@ -176,7 +179,7 @@ class SAC(object):
             self.alpha_optim.step()
         
             self.alpha = self.log_alpha.exp()
-            alpha.tlogs = self.alpha.clone() #For TensorboardX logs
+            alpha_tlogs = self.alpha.clone() #For TensorboardX logs
         else:
             # if you using a deterministic algorithm, alpha will be 0
             # and revert to the standard reinforment learning objective
