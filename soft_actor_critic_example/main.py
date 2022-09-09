@@ -12,6 +12,7 @@ from utils import validation_episodes
 def training_loop(args):
     #set up environment
     env = gym.make(args.env_name)
+    val_steps = args.steps_between_validation
     current_reward = 0
     max_reward = 0
 
@@ -26,7 +27,7 @@ def training_loop(args):
     
     #this is a logger, which is a great idea but might need to be removed
     #so it doesnt' obscure the code for readers
-    writer = SummaryWriter("run/{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name, 
+    writer = SummaryWriter(args.logs_dir + "/{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name, 
                            args.policy, "autotune" if args.automatic_entropy_tuning else ""))
 
 
@@ -89,14 +90,18 @@ def training_loop(args):
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
         #Validate the learning every several hundred episodes
-        if i_episodes % int(args.steps_between_validation) == 0 and args.eval is True:
-            current_reward = validation_episodes(env, i_episodes, agent, writer, args.render)
+        if total_numsteps > int(val_steps) and args.eval is True:
+            val_steps = int(val_steps) + int(args.steps_between_validation)
+            current_reward = validation_episodes(env, total_num_steps, agent, writer, args.render)
+            writer.add_scalar("reward/train", current_reward, total_numsteps)
 
             if max_reward <= current_reward:
-                agent.save_checkpoint(args.env_name, suffix=total_numsteps, ckpt_path=None)
+                agent.save_checkpoint(args.env_name, suffix=total_numsteps, ckpt_path=args.check_pt_name)
                 max_reward = current_reward
     
     env.close()
+    writer.flush()
+    writer.close()
 
     print("successfully exited")
 
@@ -129,7 +134,9 @@ if __name__ == "__main__":
     parser.add_argument('--render', dest="render", action='store_true', help='Allows you to render the environment or not (defaults: False)')
     parser.add_argument('--no-render', dest="render", action='store_false', help='Allows you to render the environment or not (defaults: False)')
     parser.set_defaults(render=False)
-    parser.add_argument('--steps_between_validation', type=int, default=500, metavar='N', help='This gives the variable that allows the user to validate how the algorithm is performing')
+    parser.add_argument('--steps_between_validation', type=int, default=10000, metavar='N', help='This gives the variable that allows the user to validate how the algorithm is performing')
+    parser.add_argument("--check_pt_name", type=str, default="checkpoints", help="the name of the checkpoint path you want to use")
+    parser.add_argument("--logs_dir", type=str, default="checkpoints", help="the name of the checkpoint path you want to use")
 
     args = parser.parse_args()
 

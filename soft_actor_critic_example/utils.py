@@ -31,7 +31,7 @@ def soft_update(target, source, tau):
 * false. This will also print the average reward.
 *******************************************************************
 """
-def validation_episodes(env, i_episodes, agent, writer, render):
+def validation_episodes(env, step_number, agent, writer, render):
     print("beginning validation")
     beepy.beep(sound=6)
 
@@ -54,7 +54,7 @@ def validation_episodes(env, i_episodes, agent, writer, render):
         avg_reward += episode_reward
     avg_reward /= episodes
 
-    writer.add_scalar("avg_reward/test", avg_reward, i_episodes)
+    writer.add_scalar("avg_reward/test", avg_reward, step_number)
 
     #terminate window when not necessary
     #print("terminating window after validation")
@@ -63,7 +63,7 @@ def validation_episodes(env, i_episodes, agent, writer, render):
     #env.close()
     #glfw.terminate()
     print("-------------------------------------------")
-    print("Test Episodes: {}, Avg. Reward: {} Test Episode Number for the next 10{}".format(episodes, round(avg_reward, 2), i_episodes))
+    print("Test Episodes: {}, Avg. Reward: {} Current Step number is {}".format(episodes, round(avg_reward, 2), step_number))
     print("----------------------------------------")
 
     return avg_reward
