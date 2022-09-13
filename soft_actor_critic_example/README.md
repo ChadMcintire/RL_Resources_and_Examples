@@ -5,7 +5,7 @@
 Example arguments
 
 #For the Gaussian Model
-python3 main.py --env-name Humanoid-v2 --alpha 0.05 --cuda --no-render --no-automatic_entropy_tuning --check_pt_name ch_pt --logs_dir run1_logs
+python3 main.py --env-name Humanoid-v2 --alpha 0.05 --cuda --no-render --no-automatic_entropy_tuning --check_pt_name ch_pt --logs_dir run1_logs --train
 
 
 #these need to be updated after testing

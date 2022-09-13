@@ -203,11 +203,11 @@ class SAC(object):
     *******************************************************************
     """
     # Save model parameters
-    def save_checkpoint(self, env_name, suffix="", ckpt_path="checkpoints"):
+    def save_checkpoint(self, env_name, suffix="", ckpt_path="checkpoints", alpha=.2):
         if not os.path.exists(ckpt_path + "/"):
             os.makedirs(ckpt_path + "/")
         #if ckpt_path is None:
-        ckpt_path = ckpt_path + "/sac_cp_{}_{}_{}_{}".format("tuning=" + str(self.automatic_entropy_tuning), self.policy_type, env_name, suffix)
+        ckpt_path = ckpt_path + "/sac_cp_{}_{}_{}_{}_{}".format("tuning=" + str(self.automatic_entropy_tuning), self.policy_type, env_name, alpha, suffix)
         print("Save models to {}".format(ckpt_path))
         torch.save({"policy_state_dict": self.policy.state_dict(),
                     "critic_state_dict": self.critic.state_dict(),
