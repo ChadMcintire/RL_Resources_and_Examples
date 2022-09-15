@@ -15,6 +15,8 @@ def training_loop(args):
     val_steps = args.steps_between_validation
     current_reward = 0
     max_reward = 0
+    min_policy_l = 100000
+    current_policy_l = 100000
 
     #set up seeding
     env.seed(args.seed)
@@ -27,8 +29,8 @@ def training_loop(args):
 
     #this is a logger, which is a great idea but might need to be removed
     #so it doesnt' obscure the code for readers
-    writer = SummaryWriter(args.logs_dir + "/{}_{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
-                           args.policy, "autotune" if args.automatic_entropy_tuning else "", args.alpha))
+    writer = SummaryWriter(args.logs_dir + "/{}_{}_{}_{}_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), args.env_name,
+                           args.policy, "autotune" if args.automatic_entropy_tuning else "", args.alpha, args.check_pt_name))
 
 
     #Memory replay, this helps with non-stationarity and the to help
@@ -64,6 +66,9 @@ def training_loop(args):
                     writer.add_scalar("entropy_temperature/alpha", alpha, updates)
                     updates += 1
 
+                    if current_policy_l >= policy_loss:
+                        current_policy_l = policy_loss
+
             #set the state to the next state and update the variables that depend on the step number
             next_state, reward, done, _ = env.step(action) # Step
             episode_steps += 1
@@ -86,7 +91,7 @@ def training_loop(args):
         if total_numsteps > args.num_steps:
             break
 
-        writer.add_scalar("reward/train", episode_reward, i_episodes)
+        writer.add_scalar("reward/episode", episode_reward, i_episodes)
         #print every iteration
         #print("Episode: {}, total numsteps: {}, episode steps: {}, reward: {}".format(i_episodes, total_numsteps, episode_steps, round(episode_reward, 2)))
 
@@ -94,10 +99,11 @@ def training_loop(args):
         if total_numsteps > int(val_steps) and args.eval is True:
             val_steps = int(val_steps) + int(args.steps_between_validation)
             current_reward = validation_episodes(env, total_numsteps, agent, writer, args.render)
-            writer.add_scalar("reward/train", current_reward, total_numsteps)
+            writer.add_scalar("reward/train_step", current_reward, total_numsteps)
 
-            if max_reward <= current_reward:
+            if max_reward <= current_reward or min_policy_l > current_policy_l:
                 agent.save_checkpoint(args.env_name, suffix=total_numsteps, ckpt_path=args.check_pt_name, alpha=args.alpha)
+                min_policy_l = current_policy_l 
                 max_reward = current_reward
 
     env.close()

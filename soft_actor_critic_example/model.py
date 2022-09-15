@@ -31,6 +31,7 @@ def weights_init_(m):
 *******************************************************************
 """
 
+
 class QNetwork(nn.Module):
     def __init__(self, num_inputs, num_actions, hidden_dim):
         super(QNetwork, self).__init__()
@@ -58,6 +59,58 @@ class QNetwork(nn.Module):
         x2 = F.relu(self.linear4(xu))
         x2 = F.relu(self.linear5(x2))
         x2 = self.linear6(x2)
+
+        return x1, x2
+
+
+class Deeper_QNetwork(nn.Module):
+    def __init__(self, num_inputs, num_actions, hidden_dim):
+        super(Deeper_QNetwork, self).__init__()
+
+        n1 = hidden_dim   #256
+        n2 = hidden_dim//2 #128
+        n3 = n2//2         #64
+        n4 = n3//2         #32
+        n5 = n4//2         #16
+        
+        # Q1 architecture
+        self.linear1 = nn.Linear(num_inputs + num_actions, n1)
+        self.linear2 = nn.Linear(n1, n2)  #256, 128
+        self.linear3 = nn.Linear(n2, n3)  #128, 64
+        self.linear4 = nn.Linear(n3, n4)  #64, 32
+        self.linear5 = nn.Linear(n4, n5)  #32, 16
+        self.linear6 = nn.Linear(n5, n4)  #16, 32
+        self.linear7 = nn.Linear(n4, n3)  #32, 64
+        self.linear8 = nn.Linear(n3, n2)  #64, 128
+        self.linear9 = nn.Linear(n2, n1)  #128, 256
+        self.linear10 = nn.Linear(n1, 1)  #256, 1
+
+        # Q2 architecture
+        self.linear11 = nn.Linear(num_inputs + num_actions, n1)
+        self.linear12 = nn.Linear(n1, n3)
+        self.linear13 = nn.Linear(n3, n1)
+        self.linear14 = nn.Linear(n1, 1)
+
+        self.apply(weights_init_)
+
+    def forward(self, state, action):
+        xu = torch.cat([state, action], 1)
+
+        x1 = F.relu(self.linear1(xu))
+        x1 = F.relu(self.linear2(x1))
+        x1 = F.relu(self.linear3(x1))
+        x1 = F.relu(self.linear4(x1))
+        x1 = F.relu(self.linear5(x1))
+        x1 = F.relu(self.linear6(x1))
+        x1 = F.relu(self.linear7(x1))
+        x1 = F.relu(self.linear8(x1))
+        x1 = F.relu(self.linear9(x1))
+        x1 = self.linear10(x1)
+
+        x2 = F.relu(self.linear11(xu))
+        x2 = F.relu(self.linear12(x2))
+        x2 = F.relu(self.linear13(x2))
+        x2 = self.linear14(x2)
 
         return x1, x2
 

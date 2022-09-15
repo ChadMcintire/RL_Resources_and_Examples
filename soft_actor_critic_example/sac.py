@@ -1,5 +1,5 @@
 import torch
-from model import QNetwork
+from model import QNetwork, Deeper_QNetwork
 from torch.optim import Adam
 from model import GaussianPolicy, DeterministicPolicy
 import torch.nn.functional as F
@@ -23,8 +23,11 @@ class SAC(object):
         self.device = torch.device("cuda" if args.cuda else "cpu")
 
         #set up the critic, which will be a Q function approximator 
-        self.critic = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
-    
+        if args.QNet == "original":
+            self.critic = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
+        elif args.QNet == "other":
+            self.critic = Deeper_QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(device=self.device)
+
         #print a summary of the tensor model
         #this summary is based on the forward, so the left is the shape of the state and the right, the action space
         #for example see https://github.com/sksq96/pytorch-summary#multiple-inputs
@@ -36,7 +39,10 @@ class SAC(object):
 
         
         #set up the critic_target, which will be a Q function approximator 
-        self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
+        if args.QNet == "original":
+            self.critic_target = QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
+        elif args.QNet == "other":
+            self.critic_target = Deeper_QNetwork(num_inputs, action_space.shape[0], args.hidden_size).to(self.device)
 
         #print a summary of the tensor model
         print("\n\n\n\nSummary of the Sac target")
@@ -204,8 +210,8 @@ class SAC(object):
     """
     # Save model parameters
     def save_checkpoint(self, env_name, suffix="", ckpt_path="checkpoints", alpha=.2):
-        if not os.path.exists(ckpt_path + "/"):
-            os.makedirs(ckpt_path + "/")
+        if not os.path.exists("check_points" + ckpt_path + "/"):
+            os.makedirs("check_points" ckpt_path + "/")
         #if ckpt_path is None:
         ckpt_path = ckpt_path + "/sac_cp_{}_{}_{}_{}_{}".format("tuning=" + str(self.automatic_entropy_tuning), self.policy_type, env_name, alpha, suffix)
         print("Save models to {}".format(ckpt_path))

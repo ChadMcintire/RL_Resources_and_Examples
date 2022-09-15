@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--train', dest="train", action='store_true', help='train a new model')
     parser.add_argument('--no-train', dest="train", action='store_false', help='load a previously trained model and run it')
+    parser.add_argument("--QNet", type=str, default="original", help="original, other")
     args = parser.parse_args()
 
     if args.train:
