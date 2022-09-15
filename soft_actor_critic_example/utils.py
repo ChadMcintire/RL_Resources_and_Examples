@@ -39,6 +39,7 @@ def validation_episodes(env, step_number, agent, writer, render):
     episodes = 10
 
     for _ in range(episodes):
+        print("beginning for loop")
         state = env.reset()
         episode_reward = 0
         done = False
@@ -52,6 +53,7 @@ def validation_episodes(env, step_number, agent, writer, render):
 
             state = next_state
         avg_reward += episode_reward
+        print("end for loop")
     avg_reward /= episodes
 
     writer.add_scalar("avg_reward/test", avg_reward, step_number)
