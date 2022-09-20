@@ -31,3 +31,4 @@ def run(args):
             next_state, reward, done, _ = env.step(action)
             episode_reward += reward
             state = next_state
+        print(episode_reward)

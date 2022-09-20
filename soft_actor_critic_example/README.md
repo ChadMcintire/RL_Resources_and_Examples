@@ -20,6 +20,7 @@ python3 main.py --env-name Humanoid-v2 --alpha 0.05 --cuda --render True --polic
 
 #run trained network
 python3 main.py --env-name Humanoid-v2 --alpha 0.1 --render --cuda --no-train --Qnet other --check_pt_name path
+python3 main.py --env-name Humanoid-v2 --alpha 0.1 --render --no-train --cuda --check_pt_name check_points/alt-mod-no-auto/sac_cp_tuning=True_Gaussian_Humanoid-v2_0.05_990528
 
 #use the tensorboard
 tensorboard --logdir=runs
