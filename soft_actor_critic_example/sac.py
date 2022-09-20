@@ -14,6 +14,7 @@ class SAC(object):
         self.tau = args.tau
         self.alpha = args.alpha
         self.target_update_interval = args.target_update_interval
+        self.cuda = args.cuda
 
          
         self.policy_type = args.policy
@@ -232,8 +233,9 @@ class SAC(object):
     *******************************************************************
     """
     #Load model parameters
-    def load_checkpoint(self, ckpt_path, evaluate=False):
+    def load_checkpoint(self, ckpt_path, evaluate=True):
         print("Loading models from {}".format(ckpt_path))
+        self.device = torch.device("cuda" if self.cuda else "cpu")
         if ckpt_path is not None:
             checkpoint = torch.load(ckpt_path)
             self.policy.load_state_dict(checkpoint['policy_state_dict'])
@@ -251,4 +253,6 @@ class SAC(object):
                 self.policy.train()
                 self.critic.train()
                 self.critic_target.train()
+
+            
 

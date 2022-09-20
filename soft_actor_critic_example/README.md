@@ -18,6 +18,9 @@ python3 main.py --env-name Humanoid-v2 --alpha 0.05 --cuda --render True --polic
 #For the Deterministic Model
 python3 main.py --env-name Humanoid-v2 --alpha 0.05 --cuda --render True --policy Determinitst --tau 1 --target_update_interval 1000
 
+#run trained network
+python3 main.py --env-name Humanoid-v2 --alpha 0.1 --render --cuda --no-train --Qnet other --check_pt_name path
+
 #use the tensorboard
 tensorboard --logdir=runs
 

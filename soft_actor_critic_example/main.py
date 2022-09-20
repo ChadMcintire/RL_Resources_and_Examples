@@ -16,7 +16,9 @@ if __name__ == "__main__":
     parser.add_argument("--no-automatic_entropy_tuning", action="store_false", dest="automatic_entropy_tuning", help="Automatically adjust alpha (default: False)")
     parser.set_defaults(render=False)
 
-    parser.add_argument("--cuda", action="store_true", help="run on CUDA (default: False)")
+    parser.add_argument("--cuda", dest="cuda", action="store_true", help="run on CUDA (default: true)")
+    parser.add_argument("--no-cuda", dest="cuda", action="store_false", help="run on CUDA (default: false)")
+    parser.set_defaults(cuda=False)
     parser.add_argument('--hidden_size', type=int, default=256, metavar='N', help='hidden size (default: 256)')
     parser.add_argument("--lr", type=float, default=0.0003, metavar="G", help="learning_rate (default: 0.0003)")
     parser.add_argument("--replay_size", type=int, default=1000000, metavar="N", help="size of replay buffer (default: 1000000)")
