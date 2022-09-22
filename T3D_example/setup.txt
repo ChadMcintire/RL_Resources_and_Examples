@@ -1,0 +1,5 @@
+pip3 install gym
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/chad/.mujoco/mjpro150/bin
