@@ -56,7 +56,7 @@ def training_loop(args):
     #Load pretrain policy if wished
     if args.load_model != "":
         policy_file = file_name if args.load_model == "default" else args.load_model
-        policy.load(f"./models/{policy_file}")
+        policy.load(f"./models/{policy_file}", False)
 
     #Create fifo replay buffer
     replay_buffer = ReplayBuffer(state_dim, action_dim)

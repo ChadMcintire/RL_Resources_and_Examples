@@ -112,11 +112,23 @@ class TD3(object):
         torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
 
     #Save the actor and critic and their optimizers
-    def load(self, filename):
+    def load(self, filename, evaluate=True):
         self.critic.load_state_dict(torch.load(filename + "_critic"))
         self.critic_optimizer.load_state_dict(torch.load(filename + "_critic_optimizer"))
         self.critic_target = copy.deepcopy(self.critic)
 
-        self.actor.load_state_dict(torch.laod(filename + "_actor"))
+        self.actor.load_state_dict(torch.load(filename + "_actor"))
         self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
         self.actor_target = copy.deepcopy(self.actor)
+
+        if evaluate:
+            self.critic.eval()
+            self.critic_target.eval()
+            self.actor.eval()
+            self.actor_target.eval()
+
+        else:
+            self.critic.train()
+            self.critic_target.train()
+            self.actor.train()
+            self.actor_target.train()
