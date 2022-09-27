@@ -63,7 +63,11 @@ def training_loop(args):
                     writer.add_scalar("loss/critic_2", critic_2_loss, updates)
                     writer.add_scalar("loss/policy", policy_loss, updates)
                     writer.add_scalar("loss/entropy_loss", ent_loss, updates)
-                    writer.add_scalar("entropy_temperature/alpha", alpha, updates)
+                    writer.add_scalar("entropy_temperature/alpha", args.alpha, updates)
+                    writer.add_scalar("other_hyperparameters/tau", args.tau, updates)
+                    writer.add_scalar("other_hyperparameters/updates_per_step", args.updates_per_step, updates)
+                    writer.add_scalar("other_hyperparameters/target_update_interval", args.target_update_interval, updates)
+                    writer.add_scalar("other_hyperparameters/gamma", args.gamma, updates)
                     updates += 1
 
                     if current_policy_l >= policy_loss:
