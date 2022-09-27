@@ -16,7 +16,7 @@ $\textbf{Algorithm 1}$ TD3
      <li>$\epsilon \sim \mathcal{N}(0, \sigma)$ and observe reward $r$ and new state s$\prime$
      <li>Store transition tuple $(s, a, r, s\prime)$ in $\mathcal{B}$
      <li>Sample mini-batch of $N$ transitions $(s, a, r, s\prime)$ from $\mathcal{B}$
-     <li>$\tilde{a} \leftarrow \pi_{\phi\prime}(s\prime) + \epsilon,  \epsilon \sim$ clip$(\mathcal{N}$ $(0, \tilde{\sigma}), -c, c)$ <br />
+     <li>$\tilde{a} \leftarrow \pi_{\phi\prime}(s\prime) + \epsilon,  \epsilon \sim$ clip$(\mathcal{N}(0, \tilde{\sigma}), -c, c)$ <br />
      <li>$y \leftarrow r + \gamma min_{i=1,2} Q_{\theta\prime_i}(s\prime, \tilde{a})$
      <li>Update critics $\theta_i \leftarrow argmin_{\theta_i}$ $N^{-1} \sum(y - Q_{\theta_i}(s, a))^2$
      <li>$\textbf{if}$ t mod d $\textbf{then}$
