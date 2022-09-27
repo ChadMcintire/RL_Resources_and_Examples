@@ -14,8 +14,8 @@ $\textbf{Algorithm 1}$ TD3
   <li>$\textbf{for}$ $t = 1$ $\textbf{to}$ $T$ $\textbf{do}$
   <ol>
      <li>Select action with exploration noise $a \sim \pi_\phi(s) + \epsilon$, 
-     <li>$\epsilon \sim \mathcal{N}(0, \sigma)$ and observe reward $r$ and new state $s\prime$
-     <li>Store transition tuple $(s, a, r, s\prime)$ in $\mathcal{B}$
+     $\epsilon \sim \mathcal{N}(0, \sigma)$ and observe reward $r$ and new state $s\prime$  <br />
+     Store transition tuple $(s, a, r, s\prime)$ in $\mathcal{B}$  <br />
      <li>Sample mini-batch of $N$ transitions $(s, a, r, s\prime)$ from $\mathcal{B}$
      <li>$\tilde{a} \leftarrow \pi_{\phi\prime}(s\prime) + \epsilon,  \epsilon \sim clip(\mathcal{N}(0, \tilde{\sigma}), -c, c)$ <br />
      <li>$y \leftarrow r + \gamma min_{i=1,2} Q_{\theta\prime_i}(s\prime, \tilde{a})$
