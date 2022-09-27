@@ -74,21 +74,22 @@ def training_loop(args):
 
         # Select action randomly or according to policy
         # If start time steps are low we are generating data for the 
-        # replay buffer
+        # replay buffer by random sampling, else generate 
+        # data for replay buffer by using the policy to find new states
         if t < args.start_timesteps: 
             action = env.action_space.sample() #Step 4.i pseudocode
         else:
             action = (
                         policy.select_action(np.array(state))
                         + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
-                     ).clip(-max_action, max_action) #Step 4.i pseudocode
+                     ).clip(-max_action, max_action) #Step 4.1 pseudocode
 
-        # Perform action
-        next_state, reward, done, _ = env.step(action)
+        # Perform action  
+        next_state, reward, done, _ = env.step(action)  #Step 4.i pseudocode
         done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
         #store data in replay buffer
-        replay_buffer.add(state, action, next_state, reward, done_bool)
+        replay_buffer.add(state, action, next_state, reward, done_bool) #Step 4.i pseudocode
 
         # Set up for next state
         state = next_state

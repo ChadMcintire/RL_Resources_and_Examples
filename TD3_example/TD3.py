@@ -56,51 +56,54 @@ class TD3(object):
         self.total_it += 1
 
         #Sample replay buffer
-        state, action, next_state, reward, not_done = replay_buffer.sample(batch_size)
+        state, action, next_state, reward, not_done = replay_buffer.sample(batch_size) # Step 4.ii pseudocode
 
         with torch.no_grad():
             # Select action according to policy and add clipped noise
-            noise = (
+            # but clip the noise to keep the action close to original value
+            noise = ( 
                     torch.randn_like(action) * self.policy_noise
-            ).clamp(-self.noise_clip, self.noise_clip)
+            ).clamp(-self.noise_clip, self.noise_clip) # Step 4.iii pseudocode
 
 
+            #paper doesn't say to do this but clamping to the max possible action
+            #prevents noise from going over the max
             next_action = (
                     self.actor_target(next_state) + noise
-            ).clamp(-self.max_action, self.max_action)
+            ).clamp(-self.max_action, self.max_action) # Step 4.iii pseudocode
 
             #Compute the target Q value
-            target_Q1, target_Q2 = self.critic_target(next_state, next_action)
-            target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + not_done + self.discount * target_Q
+            target_Q1, target_Q2 = self.critic_target(next_state, next_action) # Step 4.iv pseudocode
+            target_Q = torch.min(target_Q1, target_Q2) # Step 4.iv pseudocode
+            target_Q = reward + not_done + self.discount * target_Q  # Step 4.iv pseudocode
 
 
         #Get current Q estimate
-        current_Q1, current_Q2 = self.critic(state, action)
+        current_Q1, current_Q2 = self.critic(state, action) # Step 4.v pseudocode
 
         #Compute critic loss
-        critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
+        critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q) # Step 4.v pseudocode
 
         #Optimize the critic
-        self.critic_optimizer.zero_grad()
-        critic_loss.backward()
-        self.critic_optimizer.step()
+        self.critic_optimizer.zero_grad() # Step 4.v pseudocode
+        critic_loss.backward() # Step 4.v pseudocode
+        self.critic_optimizer.step() # Step 4.v pseudocode
 
         #Delayed policy updates
-        if self.total_it % self.policy_freq == 0:
+        if self.total_it % self.policy_freq == 0: # Step 4.vi
 
             #Compute actor losse
-            actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
+            actor_loss = -self.critic.Q1(state, self.actor(state)).mean() # Step 4.vi.a
 
             # Optimize the actor
-            self.actor_optimizer.zero_grad()
-            actor_loss.backward()
-            self.actor_optimizer.step()
+            self.actor_optimizer.zero_grad() # Step 4.vi.a
+            actor_loss.backward() # Step 4.vi.a
+            self.actor_optimizer.step() # Step 4.vi.a
 
 
             #Update the frozen target models
-            soft_update(self.critic_target, self.critic, self.tau)
-            soft_update(self.actor_target, self.actor, self.tau)
+            soft_update(self.critic_target, self.critic, self.tau) # Step 4.vi.b of pseudocode the first one  
+            soft_update(self.actor_target, self.actor, self.tau) # Step 4.vi.b of pseudocode the second one
 
 
     #Save the actor and critic and their optimizers
