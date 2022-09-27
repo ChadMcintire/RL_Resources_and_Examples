@@ -27,8 +27,7 @@ def training_loop(args):
     if args.save_model and not os.path.exists("./models"):
         os.makedirs("./models")
 
-    #create gym and policy required variables 
-
+    #Policy required variables 
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
@@ -59,7 +58,7 @@ def training_loop(args):
         policy.load(f"./models/{policy_file}", False)
 
     #Create fifo replay buffer
-    replay_buffer = ReplayBuffer(state_dim, action_dim)
+    replay_buffer = ReplayBuffer(state_dim, action_dim) #Step 3 pseudocode
 
     # Evaluate untrained policy
     evaluations = [eval_policy(policy, args.env, args.seed)]
@@ -70,19 +69,19 @@ def training_loop(args):
     episode_num = 0
 
     #Training loop starts here
-    for t in range(int(args.max_timesteps)):
+    for t in range(int(args.max_timesteps)): #Step 4 pseudocode
         episode_timesteps += 1
 
         # Select action randomly or according to policy
         # If start time steps are low we are generating data for the 
         # replay buffer
-        if t < args.start_timesteps:
-            action = env.action_space.sample()
+        if t < args.start_timesteps: 
+            action = env.action_space.sample() #Step 4.i pseudocode
         else:
             action = (
                         policy.select_action(np.array(state))
                         + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
-                     ).clip(-max_action, max_action)
+                     ).clip(-max_action, max_action) #Step 4.i pseudocode
 
         # Perform action
         next_state, reward, done, _ = env.step(action)

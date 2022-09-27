@@ -28,13 +28,13 @@ class TD3(object):
     ):
 
             # Set up Actor, actor target, and optimizer
-            self.actor = Actor(state_dim, action_dim, max_action).to(device) 
-            self.actor_target = copy.deepcopy(self.actor)
+            self.actor = Actor(state_dim, action_dim, max_action).to(device) #Step 1 pseudocode
+            self.actor_target = copy.deepcopy(self.actor) #Step 2 Pseudocode
             self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
 
             # Set up Critic, critic target, and optimizer
-            self.critic = Critic(state_dim, action_dim).to(device)
-            self.critic_target = copy.deepcopy(self.critic)
+            self.critic = Critic(state_dim, action_dim).to(device) #Step 1 pseudocode
+            self.critic_target = copy.deepcopy(self.critic) #Step 2 Pseudocode
             self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
 
             #Set up hyper parameters

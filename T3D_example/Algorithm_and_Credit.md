@@ -1,8 +1,9 @@
 The paper can be found at https://arxiv.org/pdf/1802.09477.pdf.
 
+Original github at https://github.com/sfujim/TD3
+
 Original Pseudocode Algorithm
 =============================
-
 
 $\textbf{Algorithm 1}$ TD3
 <ol>
@@ -10,10 +11,10 @@ $\textbf{Algorithm 1}$ TD3
       $\pi_\phi$ with random parameters $\theta_1, \theta_2, \phi$
   <li>Initialize target networks $\theta_1\prime \leftarrow \theta_1, \theta\prime_2 \leftarrow \theta_2, \phi\prime \leftarrow \phi$
   <li>Initialize replay buffer $\mathcal{B}$
-  <li>$\textbf{for}$ $t = 1$ $\textbf{to}$ $\mathcal{T}$ $\textbf{do}$
+  <li>$\textbf{for}$ $t = 1$ $\textbf{to}$ $T$ $\textbf{do}$
   <ol>
      <li>Select action with exploration noise $a \sim \pi_\phi(s) + \epsilon$, 
-     <li>$\epsilon \sim \mathcal{N}(0, \sigma)$ and observe reward $r$ and new state s$\prime$
+     <li>$\epsilon \sim \mathcal{N}(0, \sigma)$ and observe reward $r$ and new state $s\prime$
      <li>Store transition tuple $(s, a, r, s\prime)$ in $\mathcal{B}$
      <li>Sample mini-batch of $N$ transitions $(s, a, r, s\prime)$ from $\mathcal{B}$
      <li>$\tilde{a} \leftarrow \pi_{\phi\prime}(s\prime) + \epsilon,  \epsilon \sim clip(\mathcal{N}(0, \tilde{\sigma}), -c, c)$ <br />
